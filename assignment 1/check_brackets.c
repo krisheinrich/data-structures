@@ -43,59 +43,57 @@
  * and if there are no unmatched closing brackets, output the 1-based index of
  * the first unmatched opening bracket.
  *
-*************************************************************************/
+ *************************************************************************/
 
 #include <stdio.h>
-#define MAX_SIZE 10000
+#define MAX_SIZE 10001  // max input length = 10^5 + 1 for '\n'
+#define bool unsigned short
 
 struct bracket {
   unsigned int position;
   char type;
 };
 
-unsigned short match_c(char type, char c) {
-  if ( (type == '[' && c == ']') ||
-       (type == '{' && c == '}') ||
-       (type == '(' && c == ')') )
+bool match_c(char type, char c) {
+  if ((type == '[' && c == ']') || (type == '{' && c == '}') || (type == '(' && c == ')'))
       return 1;
   return 0;
 }
 
 int main() {
-  // Create stack to track opening brackets (max input length = 10^5)
   struct bracket bracket_stack[MAX_SIZE];
-  int top_index = -1;
-  // Get input string -- e.g. '{{[]}}[]{}' (valid) or '}' (not valid)
+  int top = -1;
+  // Read input
   char input[MAX_SIZE];
+
   if (fgets(input, MAX_SIZE, stdin) != NULL) {
-    // For each char
     int i;
     for (i = 0; input[i] != '\n'; i++) {
       char c = input[i];
-      // Push to stack if it is an opening bracket, i.e. '(' / '[' / '{'
+      // Push to stack if it is an opening bracket
       if (c == '(' || c == '[' || c == '{') {
-        struct bracket *b = &bracket_stack[++top_index];
+        struct bracket *b = &bracket_stack[++top];
         b->type = c;
         b->position = i;
       }
-      // Else if it is a closing brakets, i.e. ')' / ']' / '}'
+      // Else if it is a closing brakets...
       if (c == ')' || c == ']' || c == '}') {
-        // VIOLATION if the stack is empty or the top doesn't match: print position
-        if (top_index < 0 || !match_c(bracket_stack[top_index].type, c)) {
+        // ...VIOLATION if the stack is empty or top doesn't match: print position
+        if (top < 0 || !match_c(bracket_stack[top].type, c)) {
           printf("%d\n", (i+1));
           return 0;
         // Else it matches: pop the stack
         } else {
-          --top_index;// bracket_stack[top_index--] = NULL;
+          --top;
         }
       }
     }
     // If the stack is empty, print "Success"
-    if (top_index == -1) {
+    if (top == -1) {
       printf("Success\n");
     // Else print the position of the last opening bracket pushed
     } else {
-      printf("%d\n", (1 + bracket_stack[top_index].position));
+      printf("%d\n", (1 + bracket_stack[top].position));
     }
   }
 
